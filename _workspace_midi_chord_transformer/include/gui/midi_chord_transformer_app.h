@@ -26,6 +26,12 @@ private:
     // Console output
     std::vector<std::string> consoleOutput;
     
+    // Appearance settings
+    int currentTheme;
+    float uiFontSize;
+    float uiRounding;
+    bool showAppearanceWindow;
+    
     // GUI rendering methods
     void renderMainWindow();
     void renderControlPanel();
@@ -36,6 +42,7 @@ private:
     void renderProgressionAnalysis();
     void renderKeyAnalysis();
     void renderBatchProcessing();
+    void renderAppearanceOptions();
     
     // Action handlers
     void handleLoadFile();
@@ -48,6 +55,8 @@ private:
     void handleKeyDetection();
     void handleProgressionAnalysis();
     void handleChordPreview();
+    void handleAppearanceChange();
+    void applyTheme(int themeIndex);
     
     // Utility methods
     void updateConsoleOutput(const std::string& message);
