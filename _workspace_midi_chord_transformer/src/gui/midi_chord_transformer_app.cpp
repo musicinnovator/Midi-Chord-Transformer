@@ -24,6 +24,12 @@ MidiChordTransformerApp::MidiChordTransformerApp() {
     analysisFilename.resize(256);
     currentFileIndex = 0;
     
+    // Initialize appearance settings
+    currentTheme = 0; // 0 = Dark, 1 = Light, 2 = Classic
+    uiFontSize = 16.0f;
+    uiRounding = 0.0f;
+    showAppearanceWindow = false;
+    
     initializeTransformationOptions();
 }
 
@@ -170,6 +176,26 @@ void MidiChordTransformerApp::renderMainWindow() {
             ImGui::EndMenu();
         }
         
+        if (ImGui::BeginMenu("Appearance")) {
+            if (ImGui::MenuItem("Theme Settings")) {
+                showAppearanceWindow = !showAppearanceWindow;
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Dark Theme")) {
+                currentTheme = 0;
+                applyTheme(currentTheme);
+            }
+            if (ImGui::MenuItem("Light Theme")) {
+                currentTheme = 1;
+                applyTheme(currentTheme);
+            }
+            if (ImGui::MenuItem("Classic Theme")) {
+                currentTheme = 2;
+                applyTheme(currentTheme);
+            }
+            ImGui::EndMenu();
+        }
+        
         if (ImGui::BeginMenu("Help")) {
             if (ImGui::MenuItem("About")) {
                 updateConsoleOutput("MIDI Chord Transformer v1.0");
@@ -192,6 +218,12 @@ void MidiChordTransformerApp::renderMainWindow() {
     renderOutputPanel();
     
     ImGui::Columns(1);
+    
+    // Render appearance options window if open
+    if (showAppearanceWindow) {
+        renderAppearanceOptions();
+    }
+    
     ImGui::End();
 }
 
@@ -770,6 +802,97 @@ void MidiChordTransformerApp::resetChordSelection() {
         }
         targetChordNames[i] = chords[i]->name;
     }
+}
+
+void MidiChordTransformerApp::handleAppearanceChange() {
+    // This will be called when appearance settings change
+    applyTheme(currentTheme);
+}
+
+void MidiChordTransformerApp::applyTheme(int themeIndex) {
+    ImGuiStyle& style = ImGui::GetStyle();
+    
+    switch (themeIndex) {
+        case 0: // Dark Theme
+            ImGui::StyleColorsDark();
+            break;
+            
+        case 1: // Light Theme
+            ImGui::StyleColorsLight();
+            break;
+            
+        case 2: // Classic Theme
+            ImGui::StyleColorsClassic();
+            break;
+    }
+    
+    // Apply custom styling
+    style.FrameRounding = uiRounding;
+    style.WindowRounding = uiRounding;
+    style.ChildRounding = uiRounding;
+    style.ScrollbarRounding = uiRounding;
+    style.GrabRounding = uiRounding;
+    style.TabRounding = uiRounding;
+    
+    // Apply font size if changed
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.FontDefault && io.FontDefault->FontSize != uiFontSize) {
+        io.FontGlobalScale = uiFontSize / io.FontDefault->FontSize;
+    }
+}
+
+void MidiChordTransformerApp::renderAppearanceOptions() {
+    ImGui::Begin("Appearance Settings", &showAppearanceWindow);
+    
+    ImGui::Text("Theme Selection");
+    ImGui::Separator();
+    
+    const char* themeNames[] = { "Dark", "Light", "Classic" };
+    int prevTheme = currentTheme;
+    if (ImGui::Combo("Theme", &currentTheme, themeNames, 3)) {
+        if (currentTheme != prevTheme) {
+            applyTheme(currentTheme);
+        }
+    }
+    
+    ImGui::Spacing();
+    ImGui::Text("UI Customization");
+    ImGui::Separator();
+    
+    // Font size slider
+    float prevFontSize = uiFontSize;
+    if (ImGui::SliderFloat("Font Size", &uiFontSize, 8.0f, 24.0f, "%.1f")) {
+        if (uiFontSize != prevFontSize) {
+            applyTheme(currentTheme);
+        }
+    }
+    
+    // UI Rounding slider
+    float prevRounding = uiRounding;
+    if (ImGui::SliderFloat("UI Rounding", &uiRounding, 0.0f, 12.0f, "%.1f")) {
+        if (uiRounding != prevRounding) {
+            applyTheme(currentTheme);
+        }
+    }
+    
+    ImGui::Spacing();
+    ImGui::Separator();
+    
+    // Reset to defaults button
+    if (ImGui::Button("Reset to Defaults")) {
+        currentTheme = 0;
+        uiFontSize = 16.0f;
+        uiRounding = 0.0f;
+        applyTheme(currentTheme);
+    }
+    
+    ImGui::SameLine();
+    
+    if (ImGui::Button("Close")) {
+        showAppearanceWindow = false;
+    }
+    
+    ImGui::End();
 }
 
 // ConsoleRedirector implementation
