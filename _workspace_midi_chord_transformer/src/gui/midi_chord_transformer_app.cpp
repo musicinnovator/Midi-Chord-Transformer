@@ -66,6 +66,9 @@ void MidiChordTransformerApp::run() {
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     
+    // Apply initial appearance settings
+    applyTheme(currentTheme);
+    
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
